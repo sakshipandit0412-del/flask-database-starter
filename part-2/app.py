@@ -1,23 +1,10 @@
-"""
-Part 2: Full CRUD Operations with HTML Forms
-=============================================
-Complete Create, Read, Update, Delete operations with user forms.
 
-What You'll Learn:
-- HTML forms with POST method
-- request.form to get form data
-- UPDATE and DELETE SQL commands
-- redirect() and url_for() functions
-- Flash messages for user feedback
-
-Prerequisites: Complete part-1 first
-"""
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Required for flash messages
+app.secret_key = 'your-secret-key-here'  
 
 DATABASE = 'students.db'
 
@@ -42,11 +29,8 @@ def init_db():
     conn.close()
 
 
-# =============================================================================
-# CREATE - Add new student
-# =============================================================================
 
-@app.route('/add', methods=['GET', 'POST'])  # Allow both GET and POST
+@app.route('/add', methods=['GET', 'POST']) 
 def add_student():
     if request.method == 'POST':
         name = request.form['name']
@@ -55,20 +39,17 @@ def add_student():
 
         conn = get_db_connection()
         
-        # --- NEW VALIDATION LOGIC ---
-        # Check if the email already exists in the table
+        
         existing_student = conn.execute(
             'SELECT id FROM students WHERE email = ?', (email,)
         ).fetchone()
 
         if existing_student:
             conn.close()
-            # Flash a warning message and stay on the add page
+            
             flash('Error: This email is already registered!', 'danger')
             return render_template('add.html', name=name, email=email, course=course)
-        # -----------------------------
-
-        # If email is unique, proceed to insert
+       
         conn.execute(
             'INSERT INTO students (name, email, course) VALUES (?, ?, ?)',
             (name, email, course)
