@@ -1,18 +1,4 @@
-"""
-Part 5: PostgreSQL/MySQL with Environment Configuration
-========================================================
-Switch from SQLite to production-ready databases!
 
-What You'll Learn:
-- Connecting to PostgreSQL and MySQL
-- Environment variables for configuration
-- python-dotenv for .env files
-- Database URL formats
-- Connection pooling basics
-
-Prerequisites: Complete all previous parts
-Install: pip install psycopg2-binary pymysql python-dotenv
-"""
 
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -25,30 +11,23 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key')  # Get from env or use fallback
 
-# =============================================================================
-# DATABASE CONFIGURATION
-# =============================================================================
 
-# Get database URL from environment variable
-# Falls back to SQLite if not set
+
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///default.db')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Connection pool settings (for production)
+
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 10,  # Number of connections to keep open
-    'pool_recycle': 3600,  # Recycle connections after 1 hour
-    'pool_pre_ping': True,  # Check connection validity before using
+    'pool_size': 10,  
+    'pool_recycle': 3600,  
+    'pool_pre_ping': True,  
 }
 
 db = SQLAlchemy(app)
 
 
-# =============================================================================
-# MODEL
-# =============================================================================
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,14 +40,11 @@ class Product(db.Model):
         return f'<Product {self.name}>'
 
 
-# =============================================================================
-# ROUTES
-# =============================================================================
 
 @app.route('/')
 def index():
     products = Product.query.all()
-    # Show which database is being used
+    
     db_type = 'Unknown'
     db_url = DATABASE_URL.lower()
     if 'postgresql' in db_url or 'postgres' in db_url:
@@ -107,9 +83,7 @@ def delete_product(id):
     return redirect(url_for('index'))
 
 
-# =============================================================================
-# INITIALIZE DATABASE
-# =============================================================================
+
 
 def init_db():
     with app.app_context():
@@ -132,68 +106,6 @@ if __name__ == '__main__':
     app.run(debug=os.getenv('FLASK_DEBUG', 'True') == 'True')
 
 
-# =============================================================================
-# DATABASE URL FORMATS:
-# =============================================================================
-#
-# SQLite (File-based, no server needed):
-#   sqlite:///database.db
-#   sqlite:///path/to/database.db
-#
-# PostgreSQL:
-#   postgresql://username:password@host:port/database_name
-#   postgresql://postgres:mypassword@localhost:5432/mydb
-#
-# MySQL:
-#   mysql+pymysql://username:password@host:port/database_name
-#   mysql+pymysql://root:mypassword@localhost:3306/mydb
-#
-# =============================================================================
-# SETTING UP POSTGRESQL:
-# =============================================================================
-#
-# 1. Install PostgreSQL
-# 2. Create a database:
-#    psql -U postgres
-#    CREATE DATABASE flask_demo;
-#
-# 3. Set environment variable:
-#    DATABASE_URL=postgresql://postgres:password@localhost:5432/flask_demo
-#
-# 4. Install Python driver:
-#    pip install psycopg2-binary
-#
-# =============================================================================
-# SETTING UP MYSQL:
-# =============================================================================
-#
-# 1. Install MySQL
-# 2. Create a database:
-#    mysql -u root -p
-#    CREATE DATABASE flask_demo;
-#
-# 3. Set environment variable:
-#    DATABASE_URL=mysql+pymysql://root:password@localhost:3306/flask_demo
-#
-# 4. Install Python driver:
-#    pip install pymysql
-#
-# =============================================================================
-# ENVIRONMENT VARIABLES:
-# =============================================================================
-#
-# Option 1: Set in terminal
-#   Windows: set DATABASE_URL=postgresql://...
-#   Linux/Mac: export DATABASE_URL=postgresql://...
-#
-# Option 2: Use .env file (recommended)
-#   Create .env file with:
-#     DATABASE_URL=postgresql://...
-#     SECRET_KEY=your-secret-key
-#
-#   Then load with python-dotenv (already done in this file)
-#
-# =============================================================================
 
 
 # =============================================================================

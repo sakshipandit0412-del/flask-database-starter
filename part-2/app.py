@@ -132,7 +132,25 @@ def delete_student(id):
 
     flash('Student deleted!', 'danger')  
     return redirect(url_for('index'))
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    students = conn.execute('SELECT * FROM students').fetchall()
+    conn.close()
+    return render_template('index.html', students=students)
 
+@app.route('/search')
+def search_student():
+    name = request.args.get('name')
+
+    conn = get_db_connection()
+    students = conn.execute(
+        "SELECT * FROM students WHERE name LIKE ?",
+        ('%' + name + '%',)
+    ).fetchall()
+    conn.close()
+
+    return render_template('index.html', students=students)
 
 if __name__ == '__main__':
     init_db()

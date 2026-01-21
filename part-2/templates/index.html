@@ -23,6 +23,12 @@
     </style>
 </head>
 <body>
+    <form method="get" action="{{ url_for('search_student') }}">
+    <input type="text" name="name" placeholder="Search by name" required>
+    <button type="submit">Search</button>
+</form>
+
+<hr>
     <h1>Student Management (Part 2 - Full CRUD)</h1>
 
     <!-- Flash Messages -->

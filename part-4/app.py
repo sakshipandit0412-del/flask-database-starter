@@ -1,17 +1,4 @@
-"""
-Part 4: REST API with Flask
-===========================
-Build a JSON API for database operations (used by frontend apps, mobile apps, etc.)
 
-What You'll Learn:
-- REST API concepts (GET, POST, PUT, DELETE)
-- JSON responses with jsonify
-- API error handling
-- Status codes
-- Testing APIs with curl or Postman
-
-Prerequisites: Complete part-3 (SQLAlchemy)
-"""
 
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -23,10 +10,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-
-# =============================================================================
-# MODELS
-# =============================================================================
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,22 +30,17 @@ class Book(db.Model):
         }
 
 
-# =============================================================================
-# REST API ROUTES
-# =============================================================================
 
-# GET /api/books - Get all books
 @app.route('/api/books', methods=['GET'])
 def get_books():
     books = Book.query.all()
     return jsonify({  # Return JSON response
         'success': True,
         'count': len(books),
-        'books': [book.to_dict() for book in books]  # List comprehension to convert all
+        'books': [book.to_dict() for book in books]  
     })
 
 
-# GET /api/books/<id> - Get single book
 @app.route('/api/books/<int:id>', methods=['GET'])
 def get_book(id):
     book = Book.query.get(id)
@@ -71,7 +49,7 @@ def get_book(id):
         return jsonify({
             'success': False,
             'error': 'Book not found'
-        }), 404  # Return 404 status code
+        }), 404 
 
     return jsonify({
         'success': True,
@@ -79,29 +57,28 @@ def get_book(id):
     })
 
 
-# POST /api/books - Create new book
+
 @app.route('/api/books', methods=['POST'])
 def create_book():
-    data = request.get_json()  # Get JSON data from request body
+    data = request.get_json() 
 
-    # Validation
     if not data:
         return jsonify({'success': False, 'error': 'No data provided'}), 400
 
     if not data.get('title') or not data.get('author'):
         return jsonify({'success': False, 'error': 'Title and author are required'}), 400
 
-    # Check for duplicate ISBN
+    
     if data.get('isbn'):
         existing = Book.query.filter_by(isbn=data['isbn']).first()
         if existing:
             return jsonify({'success': False, 'error': 'ISBN already exists'}), 400
 
-    # Create book
+   
     new_book = Book(
         title=data['title'],
         author=data['author'],
-        year=data.get('year'),  # Optional field
+        year=data.get('year'), 
         isbn=data.get('isbn')
     )
 
@@ -112,10 +89,10 @@ def create_book():
         'success': True,
         'message': 'Book created successfully',
         'book': new_book.to_dict()
-    }), 201  # 201 = Created
+    }), 201 
 
 
-# PUT /api/books/<id> - Update book
+
 @app.route('/api/books/<int:id>', methods=['PUT'])
 def update_book(id):
     book = Book.query.get(id)
@@ -128,7 +105,7 @@ def update_book(id):
     if not data:
         return jsonify({'success': False, 'error': 'No data provided'}), 400
 
-    # Update fields if provided
+    
     if 'title' in data:
         book.title = data['title']
     if 'author' in data:
@@ -147,7 +124,7 @@ def update_book(id):
     })
 
 
-# DELETE /api/books/<id> - Delete book
+
 @app.route('/api/books/<int:id>', methods=['DELETE'])
 def delete_book(id):
     book = Book.query.get(id)
@@ -164,26 +141,21 @@ def delete_book(id):
     })
 
 
-# =============================================================================
-# BONUS: Search and Filter
-# =============================================================================
 
-# GET /api/books/search?q=python&author=john
 @app.route('/api/books/search', methods=['GET'])
 def search_books():
     query = Book.query
 
-    # Filter by title (partial match)
-    title = request.args.get('q')  # Query parameter: ?q=python
+    title = request.args.get('q')  
     if title:
-        query = query.filter(Book.title.ilike(f'%{title}%'))  # Case-insensitive LIKE
+        query = query.filter(Book.title.ilike(f'%{title}%'))  
 
-    # Filter by author
+    
     author = request.args.get('author')
     if author:
         query = query.filter(Book.author.ilike(f'%{author}%'))
 
-    # Filter by year
+    
     year = request.args.get('year')
     if year:
         query = query.filter_by(year=int(year))
@@ -197,9 +169,7 @@ def search_books():
     })
 
 
-# =============================================================================
-# SIMPLE WEB PAGE FOR TESTING
-# =============================================================================
+
 
 @app.route('/')
 def index():
@@ -281,9 +251,6 @@ curl -X DELETE http://localhost:5000/api/books/1
     '''
 
 
-# =============================================================================
-# INITIALIZE DATABASE WITH SAMPLE DATA
-# =============================================================================
 
 def init_db():
     with app.app_context():
@@ -305,39 +272,6 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-# =============================================================================
-# REST API CONCEPTS:
-# =============================================================================
-#
-# HTTP Method | CRUD      | Typical Use
-# ------------|-----------|---------------------------
-# GET         | Read      | Retrieve data
-# POST        | Create    | Create new resource
-# PUT         | Update    | Update entire resource
-# PATCH       | Update    | Update partial resource
-# DELETE      | Delete    | Remove resource
-#
-# =============================================================================
-# HTTP STATUS CODES:
-# =============================================================================
-#
-# Code | Meaning
-# -----|------------------
-# 200  | OK (Success)
-# 201  | Created
-# 400  | Bad Request (client error)
-# 404  | Not Found
-# 500  | Internal Server Error
-#
-# =============================================================================
-# KEY FUNCTIONS:
-# =============================================================================
-#
-# jsonify()           - Convert Python dict to JSON response
-# request.get_json()  - Get JSON data from request body
-# request.args.get()  - Get query parameters (?key=value)
-#
-# =============================================================================
 
 
 # =============================================================================
