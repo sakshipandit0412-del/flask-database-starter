@@ -10,7 +10,6 @@ DATABASE = 'students.db'
 
 
 def get_db_connection():
-    """Create a connection to the database"""
     conn = sqlite3.connect(DATABASE)  
     conn.row_factory = sqlite3.Row  
     return conn
